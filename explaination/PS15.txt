@@ -1,0 +1,107 @@
+### Explanation of MongoDB Operations for the `Books` Collection
+
+#### 1. **Creating the `Books` Collection and Inserting Documents**:
+```js
+db.createCollection('Books');
+
+db.Books.insertMany([
+    {
+        'Title': "Book One",
+        'Description': "An exciting adventure.",
+        'Author': "Author A",
+        'Publisher': "Publisher X",
+        'URL': "/example.com/book1",
+        'no_of_likes': 120
+    },
+    {
+        'Title': "Book Two",
+        'Description': "A thrilling mystery.",
+        'Author': "Author B",
+        'Publisher': "Publisher Y",
+        'URL': "/example.com/book2",
+        'no_of_likes': 85
+    },
+    {
+        'Title': "Book Three",
+        'Description': "A fascinating science fiction.",
+        'Author': "Author A",
+        'Publisher': "Publisher X",
+        'URL': "/example.com/book3",
+        'no_of_likes': 150
+    },
+    {
+        'Title': "Book Four",
+        'Description': "A captivating romance.",
+        'Author': "Author C",
+        'Publisher': "Publisher Z",
+        'URL': "/example.com/book4",
+        'no_of_likes': 95
+    },
+    {
+        'Title': "Book Five",
+        'Description': "A compelling drama.",
+        'Author': "Author B",
+        'Publisher': "Publisher Y",
+        'URL': "/example.com/book5",
+        'no_of_likes': 100
+    }
+]);
+```
+- **Creates the `Books` collection** in MongoDB.
+- **Inserts multiple book documents** into the collection, each containing:
+  - `Title`: The name of the book.
+  - `Description`: A brief description of the book.
+  - `Author`: The author of the book.
+  - `Publisher`: The publisher of the book.
+  - `URL`: A URL related to the book.
+  - `no_of_likes`: The number of likes the book has received.
+
+#### 2. **Finding All Books and Displaying Pretty Output**:
+```js
+db.Books.find().pretty();
+```
+- **Finds all documents** in the `Books` collection.
+- `.pretty()` is used to format the output in a readable way for better visualization.
+
+#### 3. **Counting the Number of Books for Each Author**:
+```js
+db.Books.aggregate([
+    { $group: { _id: "$Author", 'book_count': { $sum: 1 } } }
+]);
+```
+- **Uses the `aggregate` method** with the `$group` stage:
+  - Groups the books by the `Author` field (`_id: "$Author"`).
+  - Uses the `$sum` accumulator to count the number of books for each author. `{ $sum: 1 }` increments by 1 for each book.
+- The result will show the total number of books written by each author.
+
+#### 4. **Calculating the Total Likes for Each Author**:
+```js
+db.Books.aggregate([
+    { $group: { _id: "$Author", 'total_likes': { $sum: "$no_of_likes" } } }
+]);
+```
+- **Uses the `aggregate` method** with the `$group` stage:
+  - Groups the books by the `Author` field (`_id: "$Author"`).
+  - Uses the `$sum` accumulator to sum the `no_of_likes` for each author, calculating the total likes for all books written by each author.
+- The result will show the total number of likes for each author.
+
+#### 5. **Calculating the Average Likes for Each Author**:
+```js
+db.Books.aggregate([
+    { $group: { _id: "$Author", 'average_likes': { $avg: "$no_of_likes" } } }
+]);
+```
+- **Uses the `aggregate` method** with the `$group` stage:
+  - Groups the books by the `Author` field (`_id: "$Author"`).
+  - Uses the `$avg` accumulator to calculate the average of the `no_of_likes` for each author.
+- The result will show the average number of likes for each author.
+
+### Summary of Operations:
+
+- **Create and insert books**: Creates the `Books` collection and adds five books with information such as title, description, author, publisher, URL, and the number of likes.
+- **Retrieve all books**: Displays all books in the collection with a formatted output.
+- **Group by author and count books**: Groups books by author and counts how many books each author has written.
+- **Group by author and calculate total likes**: Groups books by author and calculates the total likes for each author.
+- **Group by author and calculate average likes**: Groups books by author and calculates the average number of likes each author has received across their books.
+
+These operations demonstrate how to perform basic **aggregation** in MongoDB, including grouping, counting, and calculating totals and averages.

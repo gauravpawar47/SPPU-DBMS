@@ -1,0 +1,99 @@
+### SQL and PL/SQL Explanation
+
+#### 1. **Table Creation**
+
+The code first creates two tables:
+- **`stud_marks`**: Stores student information, including roll number, name, and total marks.
+    ```sql
+    CREATE TABLE stud_marks (
+        roll_no NUMBER PRIMARY KEY,
+        name VARCHAR2(50),
+        total_marks NUMBER
+    );
+    ```
+- **`result`**: Stores the student's roll number, name, and their grade.
+    ```sql
+    CREATE TABLE result (
+        roll_no NUMBER,
+        name VARCHAR2(50),
+        grade VARCHAR2(20)
+    );
+    ```
+
+#### 2. **Inserting Data into `stud_marks`**
+
+The script then inserts data into the `stud_marks` table, which includes the roll number, student name, and their total marks:
+```sql
+INSERT INTO stud_marks (roll_no, name, total_marks) VALUES (1, 'Alice', 1200);
+INSERT INTO stud_marks (roll_no, name, total_marks) VALUES (2, 'Bob', 950);
+INSERT INTO stud_marks (roll_no, name, total_marks) VALUES (3, 'Charlie', 850);
+INSERT INTO stud_marks (roll_no, name, total_marks) VALUES (4, 'David', 700);
+INSERT INTO stud_marks (roll_no, name, total_marks) VALUES (5, 'Eve', 1100);
+```
+
+#### 3. **Creating the Procedure: `proc_grade`**
+
+The procedure `proc_grade` is defined to calculate and insert the grade for a student based on their total marks. Here's how it works:
+- **Parameters**:
+  - `temp` (input): This is the roll number of the student for whom the grade will be calculated.
+  - `p_roll_no` (output): The roll number of the student is returned by the procedure.
+  - `p_name` (output): The name of the student is returned by the procedure.
+  - `p_total` (output): The total marks of the student are returned by the procedure.
+  
+The procedure works as follows:
+
+1. **Fetching Student Data**:
+   The `SELECT` query fetches the student's name, total marks, and roll number based on the input `temp` roll number:
+   ```sql
+   SELECT name, total_marks, roll_no 
+   INTO p_name, p_total, p_roll_no
+   FROM stud_marks
+   WHERE roll_no = temp;
+   ```
+   This fetches the student's details into the corresponding output variables (`p_name`, `p_total`, and `p_roll_no`).
+
+2. **Grade Assignment**:
+   The procedure checks the total marks and assigns a grade according to the following rules:
+   - **Distinction**: If the total marks are between 990 and 1500, the grade is `'distinction'`.
+   - **First Class**: If the total marks are between 900 and 989, the grade is `'first class'`.
+   - **HSC**: If the total marks are between 825 and 899, the grade is `'HSC'`.
+   - **Fail**: If the total marks are below 825, the grade is `'fail'`.
+   
+   These grades are inserted into the `result` table:
+   ```sql
+   INSERT INTO result VALUES (p_roll_no, p_name, 'distinction');
+   ```
+
+3. **Exception Handling**:
+   - If the roll number provided in `temp` does not exist in the `stud_marks` table, a `NO_DATA_FOUND` exception is raised, and an error message is printed using `dbms_output.put_line`:
+     ```sql
+     WHEN NO_DATA_FOUND THEN
+         dbms_output.put_line('Roll no ' || temp || ' not found');
+     ```
+
+#### 4. **Anonymous Block to Call the Procedure**
+
+The **anonymous PL/SQL block** at the end of the script is used to test the procedure. The block executes the following:
+
+1. Declares variables:
+   - `temp`: The roll number to be tested (in this case, `5`).
+   - `p_roll_no`, `p_name`, `p_total`: Variables to store the result returned from the procedure.
+
+2. Calls the `proc_grade` procedure, passing the input roll number (`temp`) and receiving the result in the output variables:
+   ```sql
+   proc_grade(temp, p_roll_no, p_name, p_total);
+   ```
+
+3. Optionally, the `dbms_output.put_line` statements print the student's details and the total marks, which helps in debugging or viewing the output:
+   ```sql
+   dbms_output.put_line('Roll No: ' || p_roll_no);
+   dbms_output.put_line('Name: ' || p_name);
+   dbms_output.put_line('Total Marks: ' || p_total);
+   ```
+
+#### 5. **Summary**
+
+- The **procedure `proc_grade`** computes the grade of a student based on their total marks.
+- It checks the total marks and assigns a grade (`distinction`, `first class`, `HSC`, or `fail`) accordingly.
+- The procedure inserts the result (roll number, name, and grade) into the `result` table.
+- The anonymous block allows for testing the procedure by specifying a roll number, calling the procedure, and printing the result to `dbms_output`.

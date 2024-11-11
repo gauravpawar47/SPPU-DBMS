@@ -1,0 +1,147 @@
+### Explanation of the SQL and PL/SQL Code
+
+#### 1. **Creating and Inserting Data into the `O_RollCall` Table (Original Roll Call)**
+
+```sql
+CREATE TABLE O_RollCall (
+    roll NUMBER PRIMARY KEY,
+    name VARCHAR2(50)
+);
+```
+This creates a table named `O_RollCall` to store roll numbers and names of students, where `roll` is the primary key.
+
+**Inserting Sample Data**:
+```sql
+INSERT INTO O_RollCall (roll, name) VALUES (101, 'John');
+INSERT INTO O_RollCall (roll, name) VALUES (102, 'Alice');
+INSERT INTO O_RollCall (roll, name) VALUES (103, 'Bob');
+INSERT INTO O_RollCall (roll, name) VALUES (104, 'Charlie');
+INSERT INTO O_RollCall (roll, name) VALUES (105, 'David');
+```
+This inserts 5 records into the `O_RollCall` table, each with a unique roll number and student name.
+
+#### 2. **Creating the `N_RollCall` Table (New Roll Call)**
+
+```sql
+CREATE TABLE N_RollCall (
+    roll NUMBER PRIMARY KEY,
+    name VARCHAR2(50)
+);
+```
+This creates a second table `N_RollCall` to store roll numbers and names of students. It also has `roll` as the primary key, ensuring uniqueness of roll numbers.
+
+#### 3. **PL/SQL Block: Processing the Roll Call Data**
+
+The **PL/SQL block** performs the following actions:
+
+- **Declare the Cursors**:
+    - `crsr_class`: A cursor to fetch all records from the `O_RollCall` table.
+    - `crsr_chk`: A cursor to check if a student's name already exists in the `N_RollCall` table.
+
+    ```sql
+    CURSOR crsr_class IS 
+        SELECT * FROM O_RollCall;
+
+    CURSOR crsr_chk(str_name VARCHAR) IS 
+        SELECT roll FROM N_RollCall WHERE name = str_name;
+    ```
+
+- **Declare Variables**:
+    - `str_roll`: Holds the roll number of a student.
+    - `str_name`: Holds the name of the student.
+    - `v`: A temporary variable to store the roll number fetched from the `N_RollCall` table.
+
+    ```sql
+    str_roll N_RollCall.roll%TYPE;
+    str_name N_RollCall.name%TYPE;
+    v VARCHAR(10);
+    ```
+
+#### 4. **Main Logic**:
+
+1. **Open the `crsr_class` Cursor**:
+    - This cursor fetches all records from the `O_RollCall` table (the original roll call list).
+
+    ```sql
+    OPEN crsr_class;
+    ```
+
+2. **Loop Through the Records**:
+    - The loop fetches the `roll` and `name` of each student from `O_RollCall` and processes it one by one.
+
+    ```sql
+    FETCH crsr_class INTO str_roll, str_name;
+    EXIT WHEN crsr_class%NOTFOUND;
+    ```
+
+3. **Open the `crsr_chk` Cursor**:
+    - For each student fetched from `O_RollCall`, the `crsr_chk` cursor checks if the student's name already exists in the `N_RollCall` table.
+
+    ```sql
+    OPEN crsr_chk(str_name);
+    FETCH crsr_chk INTO v;
+    ```
+
+4. **Check if the Name Exists in `N_RollCall`**:
+    - If the name is found in the `N_RollCall` table (`crsr_chk%FOUND`), a message is displayed:
+      ```sql
+      dbms_output.put_line('Branch ' || str_name || ' exists');
+      ```
+    - If the name does not exist (`crsr_chk%NOTFOUND`), the student's data is inserted into the `N_RollCall` table:
+      ```sql
+      dbms_output.put_line('Branch ' || str_name || ' not exist. Inserting into N_RollCall table');
+      INSERT INTO N_RollCall (roll, name) VALUES (str_roll, str_name);
+      ```
+
+5. **Close the `crsr_chk` Cursor**:
+    - After processing a student's data, the `crsr_chk` cursor is closed.
+
+    ```sql
+    CLOSE crsr_chk;
+    ```
+
+6. **Close the `crsr_class` Cursor**:
+    - After processing all students, the `crsr_class` cursor is closed.
+
+    ```sql
+    CLOSE crsr_class;
+    ```
+
+#### 5. **Expected Output**:
+
+After executing the PL/SQL block, the script processes each record from `O_RollCall` and checks if the student's name exists in `N_RollCall`. If the name is not found, the student is added to `N_RollCall`.
+
+- **If a student does not exist in `N_RollCall`**:
+  The student is inserted into the `N_RollCall` table with their roll number and name, and a message is displayed:
+  ```
+  Branch John not exist. Inserting into N_RollCall table
+  Branch Alice not exist. Inserting into N_RollCall table
+  Branch Bob not exist. Inserting into N_RollCall table
+  Branch Charlie not exist. Inserting into N_RollCall table
+  Branch David not exist. Inserting into N_RollCall table
+  ```
+
+- **If a student exists in `N_RollCall`**:
+  A message is displayed indicating that the student already exists:
+  ```
+  Branch John exists
+  Branch Alice exists
+  Branch Bob exists
+  Branch Charlie exists
+  Branch David exists
+  ```
+
+#### 6. **Final State of `N_RollCall` Table**:
+
+After running the PL/SQL block, the `N_RollCall` table will contain the names and roll numbers of all students from the `O_RollCall` table. The table will look like this:
+
+| ROLL | NAME    |
+|------|---------|
+| 101  | John    |
+| 102  | Alice   |
+| 103  | Bob     |
+| 104  | Charlie |
+| 105  | David   |
+
+#### 7. **Summary**:
+This PL/SQL block transfers data from `O_RollCall` to `N_RollCall`, checking for duplicates before inserting. If a student's name does not already exist in `N_RollCall`, it inserts that student into the table, ensuring that only new entries are added.

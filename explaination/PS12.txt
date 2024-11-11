@@ -1,0 +1,168 @@
+### Explanation of the Code:
+
+The provided Java code demonstrates how to interact with an Oracle database to perform CRUD (Create, Read, Update, Delete) operations on an `Employee` table using JDBC (Java Database Connectivity).
+
+#### 1. **Database Connection Setup**:
+```java
+private static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:xe"; // Modify as per your DB
+private static final String USER = "your_username";
+private static final String PASS = "your_password";
+```
+- The `DB_URL` specifies the JDBC URL of the Oracle database. It uses the `thin` driver, which connects to the database on `localhost`, port `1521`, and database `xe`. You need to modify this to match your database configuration.
+- The `USER` and `PASS` store the credentials for connecting to the database.
+
+```java
+connection = DriverManager.getConnection(DB_URL, USER, PASS);
+```
+- The `getConnection()` method establishes a connection to the Oracle database using the provided URL and credentials.
+
+#### 2. **CRUD Operations**:
+The program defines methods to add, update, delete, and list employees in the `Employee` table.
+
+##### **Add Employee**:
+```java
+public void addEmployee() {
+    System.out.print("Enter Employee ID: ");
+    int empId = scanner.nextInt();
+    scanner.nextLine(); // Consume newline
+    System.out.print("Enter Employee Name: ");
+    String empName = scanner.nextLine();
+    System.out.print("Enter Employee Salary: ");
+    double empSalary = scanner.nextDouble();
+
+    String sql = "INSERT INTO Employee (emp_id, emp_name, emp_salary) VALUES (?, ?, ?)";
+    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+    preparedStatement.setInt(1, empId);
+    preparedStatement.setString(2, empName);
+    preparedStatement.setDouble(3, empSalary);
+
+    int rows = preparedStatement.executeUpdate();
+    if (rows > 0) {
+        System.out.println("Employee added successfully.");
+    }
+}
+```
+- Prompts the user to enter `emp_id`, `emp_name`, and `emp_salary`.
+- The `INSERT INTO` SQL statement adds a new employee to the `Employee` table using a `PreparedStatement` to prevent SQL injection.
+- If the insertion is successful, a confirmation message is printed.
+
+##### **Update Employee**:
+```java
+public void updateEmployee() {
+    System.out.print("Enter Employee ID to update: ");
+    int empId = scanner.nextInt();
+    scanner.nextLine(); // Consume newline
+    System.out.print("Enter New Employee Name: ");
+    String empName = scanner.nextLine();
+    System.out.print("Enter New Employee Salary: ");
+    double empSalary = scanner.nextDouble();
+
+    String sql = "UPDATE Employee SET emp_name = ?, emp_salary = ? WHERE emp_id = ?";
+    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+    preparedStatement.setString(1, empName);
+    preparedStatement.setDouble(2, empSalary);
+    preparedStatement.setInt(3, empId);
+
+    int rows = preparedStatement.executeUpdate();
+    if (rows > 0) {
+        System.out.println("Employee updated successfully.");
+    } else {
+        System.out.println("Employee not found.");
+    }
+}
+```
+- Prompts the user for an `emp_id` to update.
+- The SQL `UPDATE` statement modifies the `emp_name` and `emp_salary` of the employee identified by the given `emp_id`.
+- If the update is successful, a confirmation message is displayed; otherwise, it indicates that the employee was not found.
+
+##### **Delete Employee**:
+```java
+public void deleteEmployee() {
+    System.out.print("Enter Employee ID to delete: ");
+    int empId = scanner.nextInt();
+
+    String sql = "DELETE FROM Employee WHERE emp_id = ?";
+    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+    preparedStatement.setInt(1, empId);
+
+    int rows = preparedStatement.executeUpdate();
+    if (rows > 0) {
+        System.out.println("Employee deleted successfully.");
+    } else {
+        System.out.println("Employee not found.");
+    }
+}
+```
+- Prompts the user to enter an `emp_id` to delete.
+- The `DELETE` SQL statement removes the employee with the given `emp_id` from the table.
+- If successful, a confirmation message is shown; otherwise, it indicates that the employee was not found.
+
+##### **List Employees**:
+```java
+public void listEmployees() {
+    String sql = "SELECT * FROM Employee";
+    Statement statement = connection.createStatement();
+    ResultSet resultSet = statement.executeQuery(sql);
+
+    System.out.println("Employee List:");
+    while (resultSet.next()) {
+        System.out.println("ID: " + resultSet.getInt("emp_id") +
+                           ", Name: " + resultSet.getString("emp_name") +
+                           ", Salary: " + resultSet.getDouble("emp_salary"));
+    }
+}
+```
+- This method executes a `SELECT * FROM Employee` query to retrieve all employee records from the database.
+- It then iterates over the `ResultSet` and prints each employee's details.
+
+#### 3. **Main Method**:
+```java
+public static void main(String[] args) {
+    OracleDBNavigation dbNav = new OracleDBNavigation();
+    Scanner scanner = new Scanner(System.in);
+
+    while (true) {
+        System.out.println("\nChoose an operation:");
+        System.out.println("1. Add Employee");
+        System.out.println("2. Update Employee");
+        System.out.println("3. Delete Employee");
+        System.out.println("4. List Employees");
+        System.out.println("5. Exit");
+        System.out.print("Enter choice: ");
+        int choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                dbNav.addEmployee();
+                break;
+            case 2:
+                dbNav.updateEmployee();
+                break;
+            case 3:
+                dbNav.deleteEmployee();
+                break;
+            case 4:
+                dbNav.listEmployees();
+                break;
+            case 5:
+                System.out.println("Exiting...");
+                System.exit(0);
+                break;
+            default:
+                System.out.println("Invalid choice. Try again.");
+        }
+    }
+}
+```
+- The `main()` method presents a menu with options to:
+  1. Add an employee
+  2. Update an employee
+  3. Delete an employee
+  4. List all employees
+  5. Exit the program
+- The user selects an operation, and the corresponding method is called based on the input choice.
+
+### Summary of Key Concepts:
+- **JDBC (Java Database Connectivity)**: Used to interact with databases in Java. The `DriverManager.getConnection()` establishes a connection, and `PreparedStatement` is used for executing SQL queries safely.
+- **PreparedStatement**: A more secure alternative to `Statement` for executing SQL queries, as it prevents SQL injection by allowing parameterized queries.
+- **CRUD Operations**: The four main database operations are implemented here (Create, Read, Update, Delete) for managing employee records in the `Employee` table.

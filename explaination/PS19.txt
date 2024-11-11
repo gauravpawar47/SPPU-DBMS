@@ -1,0 +1,97 @@
+### Explanation of SQL Operations:
+
+#### 1. **Creating the `customer` Table**:
+```sql
+CREATE TABLE customer (
+    customer_id INT PRIMARY KEY,
+    first_name VARCHAR2(20)
+);
+```
+- This statement creates a `customer` table with two columns:
+  - `customer_id`: The primary key, uniquely identifying each customer.
+  - `first_name`: A text column to store the customer's first name.
+
+#### 2. **Creating the `orders` Table**:
+```sql
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    amount NUMBER,
+    customer_id INT,
+    FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
+);
+```
+- This creates an `orders` table with three columns:
+  - `order_id`: The primary key, uniquely identifying each order.
+  - `amount`: The total amount of the order.
+  - `customer_id`: The foreign key, linking each order to a customer (through the `customer_id` in the `customer` table).
+
+#### 3. **Inserting Data into the `customer` Table**:
+```sql
+INSERT INTO customer (customer_id, first_name) VALUES (1, 'John');
+INSERT INTO customer (customer_id, first_name) VALUES (2, 'Jane');
+INSERT INTO customer (customer_id, first_name) VALUES (3, 'Alice');
+INSERT INTO customer (customer_id, first_name) VALUES (4, 'Bob');
+```
+- These statements insert four rows into the `customer` table with sample customer data, including their `customer_id` and `first_name`.
+
+#### 4. **Inserting Data into the `orders` Table**:
+```sql
+INSERT INTO orders (order_id, amount, customer_id) VALUES (101, 150, 1);
+INSERT INTO orders (order_id, amount, customer_id) VALUES (102, 200, 2);
+INSERT INTO orders (order_id, amount, customer_id) VALUES (103, 250, 3);
+INSERT INTO orders (order_id, amount, customer_id) VALUES (104, 300, NULL);
+```
+- These statements insert four rows into the `orders` table:
+  - The first three rows are associated with customers `1`, `2`, and `3` respectively.
+  - The last row demonstrates an order (`order_id = 104`) with a `NULL` `customer_id`, meaning it doesn't belong to any customer.
+
+#### 5. **Inner Join Query**:
+```sql
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+INNER JOIN orders o
+ON c.customer_id = o.customer_id;
+```
+- This **INNER JOIN** retrieves rows where there is a matching `customer_id` in both the `customer` and `orders` tables.
+- It returns the `customer_id`, `first_name`, `order_id`, and `amount` for customers who have at least one order.
+
+#### 6. **Left Join Query**:
+```sql
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+LEFT JOIN orders o
+ON c.customer_id = o.customer_id;
+```
+- This **LEFT JOIN** retrieves all customers, even if they don't have any matching orders. If a customer has no order, the `order_id` and `amount` will be `NULL`.
+- It returns all customers with their order details (if any).
+
+#### 7. **Right Join Query**:
+```sql
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+RIGHT JOIN orders o
+ON c.customer_id = o.customer_id;
+```
+- This **RIGHT JOIN** retrieves all orders, even if they don't belong to any customer (i.e., where `customer_id` is `NULL` in the `orders` table).
+- It returns all orders, including those with no associated customer (in this case, order `104` with a `NULL` `customer_id`).
+
+#### 8. **Full Outer Join Query**:
+```sql
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+FULL OUTER JOIN orders o
+ON c.customer_id = o.customer_id;
+```
+- This **FULL OUTER JOIN** combines the results of both **LEFT JOIN** and **RIGHT JOIN**, retrieving all rows from both the `customer` and `orders` tables.
+  - If a customer has no orders, it will still be listed with `NULL` values for `order_id` and `amount`.
+  - If an order has no matching customer, it will still be listed with `NULL` values for `customer_id` and `first_name`.
+
+### Summary of Joins:
+- **INNER JOIN**: Only includes customers who have at least one matching order.
+- **LEFT JOIN**: Includes all customers, with their order details if available, and `NULL` if no orders exist.
+- **RIGHT JOIN**: Includes all orders, with their customer details if available, and `NULL` if no customer is associated.
+- **FULL OUTER JOIN**: Includes all customers and all orders, with `NULL` for missing matches in either table.
+
+### Key Points:
+- The **LEFT JOIN** and **RIGHT JOIN** allow you to retrieve records from one table even when no matching records exist in the other table.
+- The **FULL OUTER JOIN** ensures that all records from both tables are included, regardless of whether they have a match in the other table.

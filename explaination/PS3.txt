@@ -1,0 +1,92 @@
+Let's go through the SQL script step by step:
+
+### 1. **Creating the Database:**
+```sql
+CREATE DATABASE EMP1;
+USE EMP1;
+```
+- **Purpose**:
+  - `CREATE DATABASE EMP1`: Creates a new database called `EMP1` if it doesn't already exist.
+  - `USE EMP1`: Switches the active database to `EMP1`, meaning all subsequent commands will be executed on this database.
+
+### 2. **Creating the `Dept` Table:**
+```sql
+CREATE TABLE Dept (
+    deptId INT PRIMARY KEY,
+    deptName VARCHAR(10)
+);
+```
+- **Purpose**: This creates the `Dept` table, which will store department information:
+  - `deptId`: Integer, serves as the **primary key** for the department, ensuring that each department has a unique ID.
+  - `deptName`: A string (up to 10 characters) representing the department's name.
+
+### 3. **Creating the `Emp` Table:**
+```sql
+CREATE TABLE Emp (
+    empId INT PRIMARY KEY,
+    empName VARCHAR(10) NOT NULL,
+    empSal INT,
+    empDeptId INT,
+    FOREIGN KEY (empDeptId) REFERENCES Dept(deptId)
+);
+```
+- **Purpose**: This creates the `Emp` table, which stores employee information:
+  - `empId`: Integer, serves as the **primary key** for the employee, ensuring that each employee has a unique ID.
+  - `empName`: A string (up to 10 characters), representing the employee's name. It is **NOT NULL**, meaning it cannot be left empty.
+  - `empSal`: Integer, representing the employee's salary.
+  - `empDeptId`: Integer, this is a **foreign key** that links each employee to a department. It references the `deptId` column in the `Dept` table.
+
+### 4. **Inserting Records into the `Dept` Table:**
+```sql
+INSERT INTO Dept (deptId, deptName) VALUES
+(1, 'HR'),
+(2, 'IT'),
+(3, 'Finance');
+```
+- **Purpose**: This inserts three records into the `Dept` table, each representing a department with a unique `deptId` and a corresponding department name (`deptName`).
+
+### 5. **Inserting Records into the `Emp` Table:**
+```sql
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES
+(101, 'Alice', 5000, 2),
+(102, 'Bob', 4500, 1),
+(103, 'Charlie', 5500, 3);
+```
+- **Purpose**: This inserts three records into the `Emp` table, each representing an employee with their unique `empId`, `empName`, `empSal`, and `empDeptId`:
+  - The `empDeptId` column links each employee to their respective department using the `deptId` from the `Dept` table (e.g., Alice works in the IT department, Bob works in HR, and Charlie works in Finance).
+
+### 6. **Adding a New Column to the `Dept` Table:**
+```sql
+ALTER TABLE Dept
+ADD COLUMN deptLoc VARCHAR(10);
+```
+- **Purpose**: This alters the `Dept` table to add a new column, `deptLoc`, which will store the location of each department. The data type is a string (up to 10 characters).
+
+### 7. **Adding a Unique Constraint to the `deptLoc` Column:**
+```sql
+ALTER TABLE Dept
+ADD CONSTRAINT unique_deptLoc UNIQUE (deptLoc);
+```
+- **Purpose**: This adds a unique constraint to the `deptLoc` column in the `Dept` table, ensuring that each department location is unique. No two departments can have the same location.
+
+### 8. **Updating the `deptLoc` Values:**
+```sql
+UPDATE Dept SET deptLoc = 'BLR' WHERE deptId = 1;
+UPDATE Dept SET deptLoc = 'PUN' WHERE deptId = 2;
+UPDATE Dept SET deptLoc = 'DEL' WHERE deptId = 3;
+```
+- **Purpose**: These `UPDATE` statements populate the `deptLoc` column with specific location values for each department:
+  - The HR department (`deptId = 1`) is assigned to `BLR` (Bangalore).
+  - The IT department (`deptId = 2`) is assigned to `PUN` (Pune).
+  - The Finance department (`deptId = 3`) is assigned to `DEL` (Delhi).
+
+### Summary of the SQL Script:
+1. **Database Setup**: The script begins by creating a new database `EMP1` and setting it as the active database.
+2. **Table Creation**:
+   - The `Dept` table is created to store department details, with `deptId` as the primary key.
+   - The `Emp` table is created to store employee details, with a foreign key `empDeptId` that references `Dept(deptId)`.
+3. **Inserting Data**: The script inserts records into both the `Dept` and `Emp` tables, establishing departments and linking employees to those departments.
+4. **Altering Tables**: A new column `deptLoc` is added to the `Dept` table to store the location of each department, with a unique constraint ensuring no duplicate locations.
+5. **Updating Data**: The `deptLoc` column is populated with location values for each department.
+
+This script demonstrates basic table creation, data insertion, foreign key relationships, altering tables, and updating data.

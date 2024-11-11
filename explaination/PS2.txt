@@ -1,0 +1,110 @@
+Let's break down and explain the SQL script step by step:
+
+### 1. **Creating the Database (if it doesn't already exist):**
+```sql
+CREATE DATABASE IF NOT EXISTS University;
+USE University;
+```
+- **Purpose**: 
+  - `CREATE DATABASE IF NOT EXISTS University`: Creates a new database called `University` if it doesn't already exist.
+  - `USE University`: Sets the active database to `University`, meaning subsequent SQL commands will be executed on this database.
+
+### 2. **Creating the `Student` table:**
+```sql
+CREATE TABLE Student (
+    stud_id INT PRIMARY KEY,
+    deptnm VARCHAR(50),
+    sem INT,
+    name VARCHAR(100),
+    yr INT,
+    credits INT
+);
+```
+- **Purpose**: This creates a table called `Student` with the following columns:
+  - `stud_id`: Integer, serves as the **primary key** of the table, ensuring unique student IDs.
+  - `deptnm`: String (up to 50 characters) for the department name the student belongs to.
+  - `sem`: Integer, represents the semester the student is currently in.
+  - `name`: String (up to 100 characters) for the student's name.
+  - `yr`: Integer, representing the year of study.
+  - `credits`: Integer, showing the number of credits the student has earned.
+
+### 3. **Creating the `Teaches` table:**
+```sql
+CREATE TABLE Teaches (
+    teacher_id INT PRIMARY KEY,
+    teacher_name VARCHAR(100),
+    salary DECIMAL(10, 2),
+    deptnm VARCHAR(50)
+);
+```
+- **Purpose**: This creates a table called `Teaches` for storing information about teachers:
+  - `teacher_id`: Integer, serves as the **primary key** for the teacher, ensuring each teacher has a unique ID.
+  - `teacher_name`: String (up to 100 characters) for the name of the teacher.
+  - `salary`: Decimal type to store the salary, with 10 digits in total and 2 digits after the decimal point.
+  - `deptnm`: String (up to 50 characters), indicating the department in which the teacher teaches.
+
+### 4. **Inserting records into the `Student` table:**
+```sql
+INSERT INTO Student (stud_id, deptnm, sem, name, yr, credits) VALUES
+(1, 'Comp', 3, 'John Doe', 2022, 30),
+(2, 'Comp', 2, 'Jane Smith', 2023, 24),
+(3, 'Mech', 1, 'Will Johnson', 2024, 15);
+```
+- **Purpose**: This inserts three records into the `Student` table, representing three students with their respective details like student ID, department, semester, year, and credits.
+
+### 5. **Inserting records into the `Teaches` table:**
+```sql
+INSERT INTO Teaches (teacher_id, teacher_name, salary, deptnm) VALUES
+(1, 'Dr. Brown', 5000, 'Comp'),
+(2, 'Dr. Green', 3000, 'Mech'),
+(3, 'Dr. Black', 1500, 'Comp');
+```
+- **Purpose**: This inserts three records into the `Teaches` table for three teachers, specifying their teacher ID, name, salary, and department.
+
+### 6. **Updating records in the `Student` table (changing department):**
+```sql
+UPDATE Student
+SET deptnm = 'IT'
+WHERE deptnm = 'Comp';
+```
+- **Purpose**: This updates the `Student` table, changing the department name for students who belong to the `Comp` department to `IT`. 
+  - It modifies the `deptnm` value for all students who are currently in the `Comp` department.
+
+### 7. **Finding the department with the highest average salary:**
+```sql
+SELECT deptnm
+FROM Teaches
+GROUP BY deptnm
+ORDER BY AVG(salary) DESC
+LIMIT 1;
+```
+- **Purpose**: This query finds the department with the highest average salary:
+  - `GROUP BY deptnm`: Groups the records by department.
+  - `AVG(salary)`: Calculates the average salary for each department.
+  - `ORDER BY AVG(salary) DESC`: Orders the departments by the average salary in descending order.
+  - `LIMIT 1`: Limits the result to the top department with the highest average salary.
+
+### 8. **Deleting records of teachers with salary below 2000:**
+```sql
+DELETE FROM Teaches
+WHERE salary < 2000;
+```
+- **Purpose**: This deletes the records of teachers who have a salary less than 2000 from the `Teaches` table. 
+  - It checks the `salary` column and removes any teacher whose salary is below the specified threshold.
+
+### 9. **Finding the sum of salary for each department:**
+```sql
+SELECT deptnm, SUM(salary) AS total_salary
+FROM Teaches
+GROUP BY deptnm;
+```
+- **Purpose**: This query calculates the total salary for each department:
+  - `SUM(salary)`: Adds up the salaries of all teachers within each department.
+  - `GROUP BY deptnm`: Groups the records by department to calculate the total salary per department.
+
+### Summary of the SQL Script:
+- The script begins by creating a database (`University`) and two tables: `Student` and `Teaches`.
+- It populates both tables with sample data for students and teachers.
+- It then updates the department names in the `Student` table, finds the department with the highest average salary in the `Teaches` table, deletes teachers with salaries below 2000, and calculates the total salary per department.
+
+The script demonstrates basic database management operations like creating tables, inserting records, updating data, performing aggregations, and deleting records.

@@ -1,0 +1,75 @@
+### Explanation of MongoDB Operations
+
+#### 1. **Creating the `Student` Collection and Inserting Data**:
+```js
+db.createCollection('Student');
+db.Student.insertMany([
+  {'Rno': 1, 'Name': 'Piyush', 'Dept': 'COMP', 'marks': 60},
+  {'Rno': 2, 'Name': 'Pradeep', 'Dept': 'CIVIL', 'marks': 45},
+  {'Rno': 3, 'Name': 'Abhi', 'Dept': 'AIDS', 'marks': 80},
+  {'Rno': 4, 'Name': 'Ashley', 'Dept': 'COMP', 'marks': 40},
+  {'Rno': 5, 'Name': 'Vipul', 'Dept': 'Chem', 'marks': 25},
+  {'Rno': 6, 'Name': 'Pooja', 'Dept': 'COMP', 'marks': 95},
+  {'Rno': 7, 'Name': 'Pawan', 'Dept': 'CIVIL', 'marks': 65},
+  {'Rno': 8, 'Name': 'Jitu', 'Dept': 'Chem', 'marks': 85}
+]);
+```
+This code performs the following:
+- **Creates a new collection** named `Student` in the database.
+- **Inserts multiple student documents** into the `Student` collection with fields:
+  - `Rno`: Roll number of the student.
+  - `Name`: Name of the student.
+  - `Dept`: Department of the student.
+  - `marks`: Marks obtained by the student.
+
+#### 2. **Finding Students with Marks Greater than 50**:
+```js
+db.Student.find({"marks": { $gt: 50 }}).pretty();
+```
+This query retrieves all documents in the `Student` collection where the `marks` field is greater than 50:
+- `$gt` is the "greater than" operator, used here to match students who scored above 50 marks.
+- The `.pretty()` method formats the output for better readability.
+
+#### 3. **Finding Students with Marks Between 50 and 80**:
+```js
+db.Student.find({"marks": { $gt: 50, $lt: 80 }}).pretty();
+```
+This query retrieves all documents where the `marks` are **greater than 50 and less than 80**:
+- `$gt: 50` selects students who scored more than 50.
+- `$lt: 80` selects students who scored less than 80.
+- This filters out students with marks 50 or below and 80 or above.
+
+#### 4. **Finding Students in 'COMP' Department with Marks Greater Than 60**:
+```js
+db.Student.find({$and: [{"marks": { $gt: 60 }}, {"Dept": "COMP"}]}).pretty();
+```
+This query retrieves students who belong to the **'COMP' department** and have **marks greater than 60**:
+- `$and` is used to combine multiple conditions, ensuring both the `marks` and `Dept` fields match the given criteria.
+  - `marks > 60`
+  - `Dept = "COMP"`
+
+#### 5. **Updating Marks of Students in 'CIVIL' Department**:
+```js
+db.Student.updateMany({'Dept': 'CIVIL'}, {$set: {'marks': 30}});
+```
+This query performs an **update operation** on all students in the `CIVIL` department:
+- It finds all documents where the `Dept` is `CIVIL`.
+- The `$set` operator is used to update the `marks` field to 30 for all matching students.
+
+#### 6. **Deleting a Student with Marks Less Than 30 in 'Chem' Department**:
+```js
+db.Student.deleteOne({$and: [{"marks": { $lt: 30 }}, {"Dept": "Chem"}]});
+```
+This query performs a **delete operation**:
+- It deletes **one document** from the `Student` collection where:
+  - `marks` is less than 30 (`$lt: 30`).
+  - `Dept` is `Chem`.
+- Since `deleteOne` deletes only one document, it will remove only the first matching document it finds.
+
+### Summary of Operations:
+- **Creating the collection** and inserting sample data.
+- **Querying students** based on marks (greater than 50, between 50 and 80) and specific department criteria (`COMP` and marks > 60).
+- **Updating the marks** of all students in the `CIVIL` department to 30.
+- **Deleting a student** from the `Chem` department whose marks are less than 30.
+
+Each query operates on the `Student` collection, using different MongoDB operators like `$gt`, `$lt`, `$and`, `$set`, and `$deleteOne` to filter, update, and delete documents as needed.

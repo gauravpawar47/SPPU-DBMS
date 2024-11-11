@@ -1,0 +1,126 @@
+### Explanation of SQL Code
+
+#### 1. **Creating the `Borrower` Table**:
+```sql
+CREATE TABLE Borrower (
+    Rollin INT PRIMARY KEY,  -- Rollin (Student ID)
+    name VARCHAR2(30),       -- Name of the student
+    dateofissue DATE,        -- Date when the book was issued
+    nameofbook VARCHAR2(30), -- Name of the book
+    status CHAR(10)          -- Status of the book (e.g., 'Issued', 'Returned')
+);
+```
+This SQL command creates the `Borrower` table to store information about students borrowing books. The table contains:
+- `Rollin`: A unique identifier for each student (primary key).
+- `name`: The name of the student.
+- `dateofissue`: The date when the book was issued.
+- `nameofbook`: The name of the borrowed book.
+- `status`: The current status of the book (e.g., whether it is 'Issued' or 'Returned').
+
+#### 2. **Dropping the `Library_Audit` Table**:
+```sql
+DROP TABLE Library_Audit;
+```
+This command drops the `Library_Audit` table if it already exists. The purpose of this table is to track changes made to the `Borrower` table (updates or deletes).
+
+#### 3. **Creating the `Library_Audit` Table**:
+```sql
+CREATE TABLE Library_Audit (
+    Rollin INT,              -- Rollin (Student ID)
+    name CHAR(10),           -- Name of the student (limited to 10 chars)
+    dateofissue DATE,        -- Date when the book was issued
+    nameofbook VARCHAR2(30), -- Name of the book (increased to 30 chars)
+    status CHAR(10),         -- Status of the book (e.g., 'Issued', 'Returned')
+    ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp of the change
+);
+```
+This SQL command creates the `Library_Audit` table that logs changes to the `Borrower` table. The `Library_Audit` table stores:
+- `Rollin`: The student’s ID.
+- `name`: The student's name (limited to 10 characters).
+- `dateofissue`: The date the book was issued.
+- `nameofbook`: The name of the book.
+- `status`: The status of the book ('Issued' or 'Returned').
+- `ts`: The timestamp of when the change was logged (defaults to the current timestamp).
+
+#### 4. **Inserting Sample Data into the `Borrower` Table**:
+```sql
+INSERT INTO Borrower (Rollin, name, dateofissue, nameofbook, status)
+VALUES (101, 'Alice', TO_DATE('2024-10-01', 'YYYY-MM-DD'), 'Database Systems', 'Issued');
+
+INSERT INTO Borrower (Rollin, name, dateofissue, nameofbook, status)
+VALUES (102, 'Bob', TO_DATE('2024-09-15', 'YYYY-MM-DD'), 'Algorithms', 'Issued');
+
+INSERT INTO Borrower (Rollin, name, dateofissue, nameofbook, status)
+VALUES (103, 'Charlie', TO_DATE('2024-08-10', 'YYYY-MM-DD'), 'Operating Systems', 'Issued');
+```
+These insert statements add 3 records into the `Borrower` table, each representing a student who has borrowed a book. The `dateofissue` values are converted using the `TO_DATE` function, and the `status` is initially set to 'Issued'.
+
+#### 5. **Select Data from `Borrower` Table**:
+```sql
+SELECT * FROM Borrower;
+```
+This query retrieves all records from the `Borrower` table.
+
+#### 6. **Select Data from `Library_Audit` Table**:
+```sql
+SELECT * FROM Library_Audit;
+```
+This query retrieves all records from the `Library_Audit` table. Since no changes have been made yet, the table will be empty initially.
+
+#### 7. **Creating Triggers**:
+
+**Trigger for After Update on `Borrower` Table**:
+```sql
+CREATE OR REPLACE TRIGGER after_update_borrower
+AFTER UPDATE ON Borrower
+FOR EACH ROW
+BEGIN
+    -- Insert old values (before the update) into the Library_Audit table
+    INSERT INTO Library_Audit (Rollin, name, dateofissue, nameofbook, status, ts)
+    VALUES (:OLD.Rollin, :OLD.name, :OLD.dateofissue, :OLD.nameofbook, :OLD.status, CURRENT_TIMESTAMP);
+END;
+/
+```
+This trigger is fired **after an update** operation on the `Borrower` table. It inserts the old values (before the update) into the `Library_Audit` table, along with the current timestamp (`ts`).
+
+**Trigger for After Delete on `Borrower` Table**:
+```sql
+CREATE OR REPLACE TRIGGER after_delete_borrower
+AFTER DELETE ON Borrower
+FOR EACH ROW
+BEGIN
+    -- Insert old values (before the delete) into the Library_Audit table
+    INSERT INTO Library_Audit (Rollin, name, dateofissue, nameofbook, status, ts)
+    VALUES (:OLD.Rollin, :OLD.name, :OLD.dateofissue, :OLD.nameofbook, :OLD.status, CURRENT_TIMESTAMP);
+END;
+/
+```
+This trigger is fired **after a delete** operation on the `Borrower` table. It inserts the old values (before the delete) into the `Library_Audit` table, along with the current timestamp (`ts`).
+
+#### 8. **Updating the Status of a Book**:
+```sql
+UPDATE Borrower
+SET status = 'Returned'
+WHERE Rollin = 101 AND nameofbook = 'Database Systems';
+```
+This update statement changes the `status` of the book "Database Systems" borrowed by `Rollin = 101` to 'Returned'. The `after_update_borrower` trigger will be invoked, and the old values will be logged in the `Library_Audit` table.
+
+#### 9. **Deleting a Record from the `Borrower` Table**:
+```sql
+DELETE FROM Borrower
+WHERE Rollin = 101 AND nameofbook = 'Database Systems';
+```
+This delete statement removes the record for `Rollin = 101` and the book "Database Systems" from the `Borrower` table. The `after_delete_borrower` trigger will be invoked, and the deleted values will be logged in the `Library_Audit` table.
+
+#### 10. **Checking the Data in `Library_Audit` Table**:
+```sql
+SELECT * FROM Library_Audit;
+```
+After performing the update and delete operations, this query retrieves all records from the `Library_Audit` table. The table will contain the history of changes made to the `Borrower` table, including:
+- The original values before the update (from the `after_update_borrower` trigger).
+- The deleted values (from the `after_delete_borrower` trigger).
+
+### Summary:
+- The `Borrower` table tracks information about students borrowing books, including the book name, date of issue, and status.
+- The `Library_Audit` table tracks changes to the `Borrower` table, including updates and deletes, and logs them along with a timestamp.
+- Triggers are used to automatically record changes to the `Borrower` table in the `Library_Audit` table whenever a record is updated or deleted.

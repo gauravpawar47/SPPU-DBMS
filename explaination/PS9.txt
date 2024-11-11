@@ -1,0 +1,155 @@
+### Explanation of SQL and PL/SQL Code
+
+#### 1. **Dropping Tables if They Exist**
+The code starts by ensuring any existing tables `stud21` and `d_stud` are dropped:
+```sql
+DROP TABLE stud21 CASCADE CONSTRAINTS;
+DROP TABLE d_stud CASCADE CONSTRAINTS;
+```
+- `CASCADE CONSTRAINTS` ensures that any foreign key constraints dependent on these tables are also dropped.
+
+#### 2. **Creating Tables**
+Next, the tables `stud21` and `d_stud` are created:
+
+- **`stud21` Table**:
+    - Stores the roll number, attendance percentage, and status of students.
+    - The table has three columns:
+        - `roll`: Student roll number (primary key).
+        - `att`: Student's attendance percentage.
+        - `status`: Status of the student (e.g., 'Active', 'D').
+    ```sql
+    CREATE TABLE stud21 (
+        roll NUMBER PRIMARY KEY,
+        att NUMBER,
+        status VARCHAR2(10)
+    );
+    ```
+
+- **`d_stud` Table**:
+    - Stores the roll number and attendance of students who have an attendance percentage below 75%.
+    - This table is used to track students with low attendance.
+    ```sql
+    CREATE TABLE d_stud (
+        roll NUMBER,
+        att NUMBER
+    );
+    ```
+
+#### 3. **Inserting Data into `stud21`**
+The script inserts sample data into the `stud21` table:
+```sql
+INSERT INTO stud21 (roll, att, status) VALUES (101, 70, 'Active');
+INSERT INTO stud21 (roll, att, status) VALUES (102, 80, 'Active');
+INSERT INTO stud21 (roll, att, status) VALUES (103, 60, 'Active');
+INSERT INTO stud21 (roll, att, status) VALUES (104, 90, 'Active');
+INSERT INTO stud21 (roll, att, status) VALUES (105, 50, 'Active');
+```
+This data includes students with various attendance percentages. The `status` column is initially set to `'Active'`.
+
+#### 4. **PL/SQL Block: Using Cursor to Process Students with Low Attendance**
+
+The main part of the script is the **PL/SQL block** that uses a **cursor** to process the students with attendance below 75%:
+```sql
+DECLARE
+    -- Declare the cursor to select students with attendance below 75
+    CURSOR crsr_att IS
+        SELECT roll, att, status
+        FROM stud21
+        WHERE att < 75;
+
+    -- Declare variables to store fetched values from the cursor
+    mroll stud21.roll%TYPE;
+    matt stud21.att%TYPE;
+    mstatus stud21.status%TYPE;
+BEGIN
+    -- Open the cursor
+    OPEN crsr_att;
+
+    -- Loop through the cursor rows
+    LOOP
+        FETCH crsr_att INTO mroll, matt, mstatus;
+        
+        -- Exit the loop if no more rows are found
+        EXIT WHEN crsr_att%NOTFOUND;
+
+        -- If a record is found, update the status and insert into d_stud
+        IF crsr_att%FOUND THEN
+            -- Update the status for the student in stud21
+            UPDATE stud21
+            SET status = 'D'
+            WHERE roll = mroll;
+
+            -- Insert the roll and attendance into d_stud table
+            INSERT INTO d_stud (roll, att)
+            VALUES (mroll, matt);
+        END IF;
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE crsr_att;
+END;
+/
+```
+
+**Explanation of the PL/SQL Block:**
+1. **Cursor Declaration**:
+   - The cursor `crsr_att` selects students from the `stud21` table who have an attendance below 75%:
+   ```sql
+   CURSOR crsr_att IS
+       SELECT roll, att, status
+       FROM stud21
+       WHERE att < 75;
+   ```
+2. **Variable Declarations**:
+   - Variables `mroll`, `matt`, and `mstatus` are declared to hold the values fetched by the cursor for each student.
+   
+3. **Cursor Operations**:
+   - The cursor is opened with `OPEN crsr_att`.
+   - A loop is started using the `LOOP` keyword, which continuously fetches data from the cursor until all qualifying rows are processed.
+   - The loop fetches each student's roll number, attendance, and status:
+     ```sql
+     FETCH crsr_att INTO mroll, matt, mstatus;
+     ```
+   - The loop exits when no more rows are found using `EXIT WHEN crsr_att%NOTFOUND`.
+   
+4. **Processing Each Student's Data**:
+   - If the cursor successfully finds a student (`IF crsr_att%FOUND`), the following actions are performed:
+     - **Update Status**: The student's status in `stud21` is updated to `'D'` if their attendance is below 75%.
+     - **Insert into `d_stud`**: The student's roll number and attendance are inserted into the `d_stud` table.
+   
+5. **Cursor Closure**:
+   - After processing all students, the cursor is closed with `CLOSE crsr_att`.
+
+#### 5. **Select Statements to View Results**
+After executing the PL/SQL block, the following `SELECT` queries are used to view the data in the tables:
+
+1. **`SELECT * FROM stud21`**: Displays all students and their updated statuses after processing.
+2. **`SELECT * FROM d_stud`**: Displays the students who have an attendance below 75%, with their roll number and attendance stored in the `d_stud` table.
+
+#### 6. **Final Output**
+- After executing the above block, the status of students in `stud21` who have attendance below 75% will be updated to `'D'`, and their roll number and attendance will be inserted into `d_stud`.
+
+**Example of Expected Output:**
+
+- For `stud21`:
+  ```
+  ROLL  ATT   STATUS
+  101   70    D
+  102   80    Active
+  103   60    D
+  104   90    Active
+  105   50    D
+  ```
+
+- For `d_stud` (students with attendance below 75%):
+  ```
+  ROLL  ATT
+  101   70
+  103   60
+  105   50
+  ```
+
+#### Summary:
+- **Cursor** is used to fetch students with attendance below 75% from the `stud21` table.
+- **Status Update**: Their status is changed to `'D'` in `stud21`.
+- **Data Insertion**: Their roll number and attendance are stored in `d_stud` for further processing.

@@ -1,0 +1,171 @@
+Let's break down the SQL script and explain each section:
+
+### 1. **Creating the Database:**
+```sql
+CREATE DATABASE EMP3;
+USE EMP3;
+```
+- **Purpose**: 
+  - `CREATE DATABASE EMP3`: Creates a new database named `EMP3` if it doesn't exist.
+  - `USE EMP3`: Switches to the `EMP3` database, meaning all operations following this statement will apply to this database.
+
+### 2. **Creating the `employee` Table:**
+```sql
+CREATE TABLE employee (
+    employee_name VARCHAR(50),
+    street VARCHAR(50),
+    city VARCHAR(50),
+    PRIMARY KEY (employee_name)
+);
+```
+- **Purpose**: 
+  - Creates the `employee` table to store employee details:
+    - `employee_name`: A string (up to 50 characters), serves as the **primary key** for the employee's name.
+    - `street`: A string (up to 50 characters) representing the street address of the employee.
+    - `city`: A string (up to 50 characters) representing the city where the employee resides.
+  
+### 3. **Creating the `works` Table:**
+```sql
+CREATE TABLE works (
+    employee_name VARCHAR(50),
+    company_name VARCHAR(50),
+    salary INT,
+    PRIMARY KEY (employee_name, company_name),
+    FOREIGN KEY (employee_name) REFERENCES employee(employee_name)
+);
+```
+- **Purpose**:
+  - Creates the `works` table to represent the relationship between employees and the companies they work for:
+    - `employee_name`: A string (up to 50 characters), representing the employee's name. This column is also a **foreign key** referencing the `employee_name` column from the `employee` table.
+    - `company_name`: A string (up to 50 characters), representing the company the employee works for.
+    - `salary`: An integer representing the employee's salary.
+    - **Primary Key**: A composite primary key is created on the combination of `employee_name` and `company_name` to ensure that each employee can be linked to only one company at a time.
+    - **Foreign Key**: `employee_name` references the `employee_name` column in the `employee` table, enforcing referential integrity.
+
+### 4. **Creating the `company` Table:**
+```sql
+CREATE TABLE company (
+    company_name VARCHAR(50),
+    city VARCHAR(50),
+    PRIMARY KEY (company_name)
+);
+```
+- **Purpose**: 
+  - Creates the `company` table to store company information:
+    - `company_name`: A string (up to 50 characters), serves as the **primary key** for the company name.
+    - `city`: A string (up to 50 characters) representing the city where the company is located.
+
+### 5. **Creating the `manages` Table:**
+```sql
+CREATE TABLE manages (
+    employee_name VARCHAR(50),
+    manager_name VARCHAR(50),
+    PRIMARY KEY (employee_name, manager_name)
+);
+```
+- **Purpose**: 
+  - Creates the `manages` table to represent managerial relationships:
+    - `employee_name`: A string (up to 50 characters), representing the employee being managed.
+    - `manager_name`: A string (up to 50 characters), representing the manager of the employee.
+    - The combination of `employee_name` and `manager_name` is set as the **primary key**, ensuring that an employee can have only one manager in this table.
+
+### 6. **Inserting Records into `employee` Table:**
+```sql
+INSERT INTO employee (employee_name, street, city) VALUES
+('Alice', '123 Main St', 'New York'),
+('Bob', '456 Elm St', 'Los Angeles'),
+('Charlie', '789 Maple Ave', 'Chicago'),
+('David', '101 Oak St', 'New York'),
+('Eve', '202 Pine St', 'Chicago');
+```
+- **Purpose**: 
+  - Inserts five records into the `employee` table, each representing an employee with their name, street address, and city.
+
+### 7. **Inserting Records into `company` Table:**
+```sql
+INSERT INTO company (company_name, city) VALUES
+('First Bank Corporation', 'New York'),
+('Tech Solutions', 'Los Angeles'),
+('Finance Corp', 'Chicago'),
+('Marketing Experts', 'New York'),
+('Innovatech', 'San Francisco');
+```
+- **Purpose**: 
+  - Inserts five records into the `company` table, each representing a company with its name and the city in which it is located.
+
+### 8. **Inserting Records into `works` Table:**
+```sql
+INSERT INTO works (employee_name, company_name, salary) VALUES
+('Alice', 'First Bank Corporation', 12000),
+('Bob', 'Tech Solutions', 15000),
+('Charlie', 'Finance Corp', 18000),
+('David', 'Marketing Experts', 14000),
+('Eve', 'First Bank Corporation', 9000);
+```
+- **Purpose**: 
+  - Inserts five records into the `works` table, each representing an employee's job, including the company they work for and their salary.
+
+### 9. **Inserting Records into `manages` Table:**
+```sql
+INSERT INTO manages (employee_name, manager_name) VALUES
+('Alice', 'David'),
+('Bob', 'Charlie'),
+('Charlie', 'Bob'),
+('David', 'Eve'),
+('Eve', 'Alice');
+```
+- **Purpose**: 
+  - Inserts five records into the `manages` table, creating a circular managerial relationship among employees.
+
+### 10. **Query 1: Find Names, Street Addresses, and Cities for Employees Working for 'First Bank Corporation' and Earning More Than $10,000:**
+```sql
+SELECT e.employee_name, e.street, e.city
+FROM employee e
+JOIN works w ON e.employee_name = w.employee_name
+WHERE w.company_name = 'First Bank Corporation' AND w.salary > 10000;
+```
+- **Purpose**:
+  - This query joins the `employee` table with the `works` table to find employees who work for 'First Bank Corporation' and earn more than $10,000.
+  - It retrieves the `employee_name`, `street`, and `city` of employees who meet these conditions.
+
+### 11. **Query 2: Find Names of Employees Who Live in the Same Cities as the Companies They Work For:**
+```sql
+SELECT DISTINCT e.employee_name
+FROM employee e
+JOIN works w ON e.employee_name = w.employee_name
+JOIN company c ON w.company_name = c.company_name
+WHERE e.city = c.city;
+```
+- **Purpose**:
+  - This query finds employees who live in the same city as the company they work for by joining the `employee`, `works`, and `company` tables.
+  - It uses the `DISTINCT` keyword to avoid duplicate results, ensuring each employee is listed once, even if they work for multiple companies in the same city.
+
+### 12. **Query 3: Find Average Salary of Employees at 'First Bank Corporation':**
+```sql
+SELECT AVG(salary) AS average_salary
+FROM works
+WHERE company_name = 'First Bank Corporation';
+```
+- **Purpose**:
+  - This query calculates the average salary of employees working at 'First Bank Corporation' using the `AVG()` function on the `salary` column in the `works` table.
+
+### 13. **Query 4: Give Employees at 'First Bank Corporation' a 15% Raise if Their Salary is Less Than $20,000:**
+```sql
+UPDATE works
+SET salary = salary * 1.15
+WHERE company_name = 'First Bank Corporation' AND salary < 20000;
+```
+- **Purpose**:
+  - This `UPDATE` query increases the salary of employees at 'First Bank Corporation' by 15% (`salary * 1.15`) if their current salary is less than $20,000.
+
+### Summary of the SQL Script:
+1. **Database Creation**: The script creates a new database `EMP3` and sets it as the active database.
+2. **Table Creation**: 
+   - The `employee`, `company`, `works`, and `manages` tables are created to represent employees, companies, job details, and managerial relationships.
+3. **Data Insertion**: 
+   - Records are inserted into each table to provide sample data for employees, companies, job details, and management structure.
+4. **Queries**:
+   - The script includes queries to retrieve specific employee information based on company, location, salary, and other criteria.
+   - The final query updates the salaries of certain employees by giving them a 15% raise if they meet a specified condition.
+
+This script demonstrates relational database design with primary and foreign key constraints, as well as various SQL operations like inserting, updating, joining, and aggregating data.

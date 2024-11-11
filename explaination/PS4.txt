@@ -1,0 +1,128 @@
+Let's go through the SQL script step by step:
+
+### 1. **Creating the Database:**
+```sql
+CREATE DATABASE EMP2;
+USE EMP2;
+```
+- **Purpose**: 
+  - `CREATE DATABASE EMP2`: Creates a new database named `EMP2` if it doesn't already exist.
+  - `USE EMP2`: Switches the active database to `EMP2`, meaning all subsequent operations will be performed on this database.
+
+### 2. **Creating the `Dept` Table:**
+```sql
+CREATE TABLE Dept (
+    deptId INT PRIMARY KEY,
+    deptName VARCHAR(10)
+);
+```
+- **Purpose**: 
+  - Creates the `Dept` table to store department details:
+    - `deptId`: Integer, serves as the **primary key** to uniquely identify each department.
+    - `deptName`: A string (up to 10 characters), representing the department's name.
+
+### 3. **Creating the `Emp` Table:**
+```sql
+CREATE TABLE Emp (
+    empId INT PRIMARY KEY,
+    empName VARCHAR(10) NOT NULL,
+    empSal INT,
+    empDeptId INT,
+    FOREIGN KEY (empDeptId) REFERENCES Dept(deptId)
+);
+```
+- **Purpose**: 
+  - Creates the `Emp` table to store employee details:
+    - `empId`: Integer, serves as the **primary key** to uniquely identify each employee.
+    - `empName`: A string (up to 10 characters), representing the employee's name. It is **NOT NULL**, meaning it must always have a value.
+    - `empSal`: Integer, representing the employee's salary.
+    - `empDeptId`: Integer, representing the department to which the employee belongs. This is a **foreign key** referencing `deptId` from the `Dept` table.
+
+### 4. **Inserting Records into the `Dept` Table:**
+```sql
+INSERT INTO Dept (deptId, deptName) VALUES
+(10, 'HR'),
+(20, 'IT'),
+(30, 'Finance'),
+(40, 'Marketing');
+```
+- **Purpose**: 
+  - Inserts four records into the `Dept` table, each representing a department with a unique `deptId` and a corresponding department name (`deptName`).
+
+### 5. **Inserting Records into the `Emp` Table:**
+```sql
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES
+(101, 'Alice', 25000, 10),
+(102, 'Bob', 18000, 20),
+(103, 'Charlie', 15000, 30),
+(104, 'David', 12000, 40),
+(105, 'Eve', 30000, 10);
+```
+- **Purpose**: 
+  - Inserts five records into the `Emp` table, representing employees with their unique `empId`, `empName`, `empSal`, and `empDeptId`. 
+  - The `empDeptId` links each employee to a department from the `Dept` table.
+
+### 6. **Listing Employees Belonging to Departments 30, 40, or 10:**
+```sql
+SELECT *
+FROM Emp
+WHERE empDeptId IN (30, 40, 10);
+```
+- **Purpose**: 
+  - This `SELECT` query retrieves all employees who belong to one of the specified departments: 30 (Finance), 40 (Marketing), or 10 (HR).
+  - The `IN` operator is used to filter records where `empDeptId` matches any of the values listed (30, 40, 10).
+
+### 7. **Listing Employee Details with Salary Between 10,000 and 30,000:**
+```sql
+SELECT *
+FROM Emp
+WHERE empSal BETWEEN 10000 AND 30000;
+```
+- **Purpose**: 
+  - This `SELECT` query retrieves employee records where the salary (`empSal`) is between 10,000 and 30,000 (inclusive).
+  - The `BETWEEN` operator is used to filter salaries within the specified range.
+
+### 8. **Listing Total Number of Employees:**
+```sql
+SELECT COUNT(*) AS total_employees
+FROM Emp;
+```
+- **Purpose**: 
+  - This query counts the total number of employee records in the `Emp` table and labels the result as `total_employees`.
+  - The `COUNT(*)` function counts all rows in the table.
+
+### 9. **Listing Average Salary of Each Department:**
+```sql
+SELECT empDeptId, AVG(empSal) AS average_salary
+FROM Emp
+GROUP BY empDeptId;
+```
+- **Purpose**: 
+  - This query calculates the average salary (`AVG(empSal)`) for each department, grouping the results by the department ID (`empDeptId`).
+  - The `GROUP BY` clause groups records by department (`empDeptId`), and the `AVG()` function calculates the average salary for each group.
+
+### 10. **Listing Employee Details in Ascending Order of Salary:**
+```sql
+SELECT *
+FROM Emp
+ORDER BY empSal ASC;
+```
+- **Purpose**: 
+  - This query retrieves all employee records and orders them by their salary (`empSal`) in ascending order (from lowest to highest).
+  - The `ORDER BY` clause specifies that the result should be sorted by `empSal` in ascending order (`ASC`).
+
+### Summary of the SQL Script:
+1. **Database Creation**: The script begins by creating a new database `EMP2` and switching to it.
+2. **Table Creation**: 
+   - The `Dept` table is created to store department information with a primary key `deptId`.
+   - The `Emp` table is created to store employee details, with a foreign key (`empDeptId`) linking employees to their respective departments in the `Dept` table.
+3. **Inserting Data**: Data is inserted into both the `Dept` and `Emp` tables, establishing departments and linking employees to these departments.
+4. **Queries**: 
+   - The script includes several queries that filter, count, and summarize data:
+     - Listing employees by department IDs.
+     - Listing employees by salary range.
+     - Counting the total number of employees.
+     - Calculating the average salary per department.
+     - Sorting employees by salary in ascending order.
+
+This script demonstrates basic operations such as inserting, selecting, updating, and aggregating data, as well as working with primary and foreign key relationships.

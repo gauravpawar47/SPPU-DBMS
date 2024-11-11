@@ -1,0 +1,175 @@
+Let's break down and explain the SQL script step by step:
+
+### 1. **Creating the Database:**
+```sql
+CREATE DATABASE EMP4;
+USE EMP4;
+```
+- **Purpose**: 
+  - `CREATE DATABASE EMP4`: Creates a new database called `EMP4`.
+  - `USE EMP4`: Switches to the `EMP4` database, making it the active database for subsequent operations.
+
+### 2. **Creating the Tables:**
+
+#### 2.1. **Creating the `employee` Table:**
+```sql
+CREATE TABLE employee(
+    emp_name VARCHAR(100), 
+    street VARCHAR(100), 
+    city VARCHAR(100)
+);
+```
+- **Purpose**: 
+  - Creates the `employee` table, where each employee's details such as name (`emp_name`), street address (`street`), and city (`city`) will be stored.
+
+#### 2.2. **Creating the `work` Table:**
+```sql
+CREATE TABLE work(
+    name VARCHAR(100), 
+    company VARCHAR(100), 
+    salary INT
+);
+```
+- **Purpose**: 
+  - Creates the `work` table to store employment details, such as the employee's name (`name`), the company they work for (`company`), and their salary (`salary`).
+
+#### 2.3. **Creating the `company` Table:**
+```sql
+CREATE TABLE company(
+    cname VARCHAR(100), 
+    city VARCHAR(100)
+);
+```
+- **Purpose**: 
+  - Creates the `company` table, storing the company name (`cname`) and the city where the company is located (`city`).
+
+#### 2.4. **Creating the `manages` Table:**
+```sql
+CREATE TABLE manages(
+    name VARCHAR(100), 
+    manager VARCHAR(100)
+);
+```
+- **Purpose**: 
+  - Creates the `manages` table to represent a managerial relationship. This table stores the employee's name (`name`) and the manager they report to (`manager`).
+
+### 3. **Inserting Records into Tables:**
+
+#### 3.1. **Inserting Records into the `employee` Table:**
+```sql
+INSERT INTO employee 
+    VALUES('Rohit', 'Pimpri', 'Pune');
+INSERT INTO employee 
+    VALUES('Rahul', 'akurdi', 'Mumbai');
+INSERT INTO employee 
+    VALUES('Pittu', 'AKURDI', 'Pune');
+```
+- **Purpose**: 
+  - Inserts three records into the `employee` table with employee names, street addresses, and cities.
+
+#### 3.2. **Inserting Records into the `work` Table:**
+```sql
+INSERT INTO work 
+    VALUES('Rohit', 'SKF', 20000);
+INSERT INTO work 
+    VALUES('Rahul', 'First Bank Corporation', 20500);
+INSERT INTO work 
+    VALUES('Pittu', 'Small Bank Corporation', 5000);
+```
+- **Purpose**: 
+  - Inserts three records into the `work` table, specifying the employee name, company, and salary.
+
+#### 3.3. **Inserting Records into the `company` Table:**
+```sql
+INSERT INTO company 
+    VALUES('SKF', 'Pune');
+INSERT INTO company 
+    VALUES('First Bank Corporation', 'Mumbai');
+INSERT INTO company 
+    VALUES('Small Bank Corporation', 'Pune');
+```
+- **Purpose**: 
+  - Inserts three records into the `company` table, specifying the company name and the city in which each company is located.
+
+#### 3.4. **Inserting Records into the `manages` Table:**
+```sql
+INSERT INTO manages 
+    VALUES('Rohit', 'Tejas');
+INSERT INTO manages 
+    VALUES('Rahul', 'Rohit');
+INSERT INTO manages 
+    VALUES('Pittu', 'Raj');
+```
+- **Purpose**: 
+  - Inserts three records into the `manages` table, specifying the employee name and their manager.
+
+### 4. **Executing Queries:**
+
+#### 4.1. **Select Employees from Specified Cities:**
+```sql
+SELECT * 
+FROM employee 
+WHERE city = 'Pune' 
+    OR city = 'Mumbai' 
+    OR city = 'Nashik';
+```
+- **Purpose**:
+  - This query retrieves all records from the `employee` table where the `city` is either `Pune`, `Mumbai`, or `Nashik`.
+
+#### 4.2. **Select Employees with Salary Greater Than the Max Salary in Another Company:**
+```sql
+SELECT name 
+FROM work 
+WHERE company = 'First Bank Corporation' 
+    AND salary > (
+        SELECT MAX(salary) 
+        FROM work 
+        WHERE company = 'Small Bank Corporation'
+    );
+```
+- **Purpose**:
+  - This query retrieves the names of employees working at `First Bank Corporation` whose salary is greater than the maximum salary at `Small Bank Corporation`. 
+  - The subquery `(SELECT MAX(salary) FROM work WHERE company = 'Small Bank Corporation')` finds the maximum salary in the `Small Bank Corporation`, and the outer query compares each employee's salary at `First Bank Corporation` to that maximum.
+
+#### 4.3. **Create a View to Join the `employee` and `manages` Tables:**
+```sql
+CREATE VIEW my AS 
+    SELECT emp_name, street, city, manager 
+    FROM employee 
+    JOIN manages 
+        ON emp_name = manages.name;
+
+SELECT * 
+FROM my;
+```
+- **Purpose**:
+  - This query creates a view called `my` that joins the `employee` and `manages` tables. The view contains employee information (name, street, city) along with their manager's name.
+  - The `SELECT * FROM my` then retrieves all records from this view.
+
+#### 4.4. **Update Salary for Employees with Salary Less Than $20,000:**
+```sql
+UPDATE work 
+SET salary = (1.15 * salary) 
+WHERE company = 'First Bank Corporation' 
+    AND salary < 20000;
+```
+- **Purpose**:
+  - This query updates the salary for employees at `First Bank Corporation` who earn less than $20,000 by increasing their salary by 15% (`1.15 * salary`).
+
+### Explanation of the View and Update Queries:
+
+1. **View Creation**:
+   - A **view** in SQL is a virtual table that combines data from multiple tables. In this case, the `my` view combines the `employee` and `manages` tables by joining them on the employee name.
+   - This allows you to easily access combined information, such as the employee's details (name, street, city) and the manager's name, without repeatedly writing complex joins in queries.
+
+2. **Salary Update**:
+   - The **UPDATE** statement modifies data in a table. Here, it adjusts the salaries of employees who work for `First Bank Corporation` and have a salary below $20,000, giving them a 15% raise. This is accomplished by multiplying the salary by `1.15`.
+
+### Summary of the SQL Script:
+- The script creates four tables (`employee`, `work`, `company`, `manages`), inserts sample data, and executes queries to:
+  1. Select employees based on their city.
+  2. Find employees with a salary higher than the maximum salary in another company.
+  3. Create and use a view that combines employee and manager information.
+  4. Update the salary for certain employees based on specified conditions.
+
+This script demonstrates the use of table creation, data insertion, subqueries, view creation, and update operations in SQL.

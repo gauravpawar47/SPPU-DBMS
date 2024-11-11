@@ -1,0 +1,98 @@
+### SQL Explanation of the Procedure `proc_fine`
+
+The code defines a **PL/SQL procedure** named `proc_fine`, which calculates the fine for a borrower based on the days a book is returned late. The procedure takes three input parameters:
+1. `i_roll_no` (roll number of the borrower).
+2. `name_of_book` (the name of the book borrowed by the student).
+3. `return_date` (the date the book is returned).
+
+The procedure calculates the number of days the book is overdue and then computes the fine according to certain rules. It updates the borrower's record with the status of the book and inserts a record into the `fine` table to store the calculated fine.
+
+### Steps Explained:
+
+#### 1. **Parameters**:
+The procedure `proc_fine` takes the following parameters:
+- `i_roll_no`: The roll number of the student borrowing the book (used to identify the borrower).
+- `name_of_book`: The name of the book borrowed by the student.
+- `return_date`: The date on which the book is being returned.
+
+#### 2. **Local Variables**:
+- `temp`: Temporary variable to hold the number of days exceeding 30 days.
+- `doi`: Date of issue of the book, which is fetched from the `borrower` table.
+- `fine`: Variable to hold the calculated fine.
+- `no_of_days`: Variable to store the difference between the `return_date` and `doi` (date of issue).
+
+#### 3. **Fetching Date of Issue**:
+The first `SELECT` statement fetches the date the book was issued (`doi`) for the given `roll_no` and `name_of_book`:
+```sql
+SELECT TO_DATE(borrower.dateofissue, 'DD-MM-YYYY') 
+INTO doi 
+FROM borrower 
+WHERE borrower.roll_no = i_roll_no 
+AND borrower.name_of_book = name_of_book;
+```
+- The date of issue (`dateofissue`) is retrieved from the `borrower` table, and it's converted to a `DATE` type.
+- If no record is found for the given `roll_no` and `name_of_book`, it will raise a `NO_DATA_FOUND` exception.
+
+#### 4. **Calculating the Number of Overdue Days**:
+The number of days overdue (`no_of_days`) is calculated by subtracting `doi` from `return_date`:
+```sql
+no_of_days := return_date - doi;
+```
+
+#### 5. **Fine Calculation Logic**:
+The procedure checks the number of overdue days and applies the following fine calculation rules:
+- If the overdue days (`no_of_days`) are between 15 and 30 days (inclusive), the fine is calculated as:
+  ```sql
+  fine := 5 * no_of_days;
+  ```
+  - For example, if the overdue days are 20, the fine would be `5 * 20 = 100`.
+
+- If the overdue days exceed 30 days, the fine is calculated as:
+  ```sql
+  fine := 150 + (no_of_days - 30) * 50;
+  ```
+  - For example, if the overdue days are 40, the fine would be `150 + (40 - 30) * 50 = 150 + 500 = 650`.
+
+#### 6. **Inserting the Fine Record**:
+After calculating the fine, the procedure inserts a record into the `fine` table with the `roll_no`, `return_date`, and the calculated `fine`:
+```sql
+INSERT INTO fine 
+VALUES (i_roll_no, return_date, fine);
+```
+
+#### 7. **Updating Borrower Status**:
+The status of the book is updated in the `borrower` table to `'RETURNED'`:
+```sql
+UPDATE borrower 
+SET status = 'RETURNED' 
+WHERE borrower.roll_no = i_roll_no;
+```
+
+#### 8. **Exception Handling**:
+If the `SELECT` query for fetching the date of issue doesn't find any matching record, the `NO_DATA_FOUND` exception will be raised. In this case, the procedure will print a message indicating that the book was not found:
+```sql
+WHEN no_data_found THEN
+    dbms_output.put_line('Book ' || name_of_book || ' not found');
+```
+
+#### 9. **Anonymous Block for Testing**:
+The anonymous block at the end of the script calls the procedure `proc_fine` for a test case:
+```sql
+DECLARE
+    i_roll_no NUMBER := 45; -- Example Roll No
+    name_of_book VARCHAR2(25) := 'HARRY POTTER'; -- Example Book Name
+    return_date DATE := TO_DATE(SYSDATE, 'DD-MM-YYYY'); -- Current Date
+BEGIN
+    proc_fine(i_roll_no, name_of_book, return_date);
+END;
+```
+- This block assigns test values to the `i_roll_no`, `name_of_book`, and `return_date` variables and then calls the `proc_fine` procedure to calculate and insert the fine.
+
+### Summary of the Procedure:
+- The procedure calculates the overdue fine based on the number of days the book is overdue.
+- If the book is overdue for up to 30 days, the fine is `5 * overdue_days`.
+- If the book is overdue for more than 30 days, a higher fine is applied: a base fine of `150` for the first 30 days, and an additional `50` per day after that.
+- The procedure also updates the borrower's status and inserts a record into the `fine` table.
+- If no record is found for the specified book and borrower, an exception is handled by printing a message.
+
+This procedure helps automate the fine calculation and status update for borrowed books in a library system.

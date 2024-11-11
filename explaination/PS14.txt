@@ -1,0 +1,84 @@
+### Explanation of MongoDB Operations
+
+#### 1. **Creating the `Employee` Collection and Inserting Documents**:
+```js
+db.createCollection('Employee');
+db.Employee.insertMany([
+  { 'Name': 'Piyush', 'Dept': 'Accounts', 'sal': 50000 },
+  { 'Name': 'Pradeep', 'Dept': 'Finance', 'sal': 45000 },
+  { 'Name': 'Abhi', 'Dept': 'HR', 'sal': 80000 },
+  { 'Name': 'Ashley', 'Dept': 'HR', 'sal': 85000 },
+  { 'Name': 'Vipul', 'Dept': 'Finance', 'sal': 25000 },
+  { 'Name': 'Pooja', 'Dept': 'Finance', 'sal': 95000 },
+  { 'Name': 'Pawan', 'Dept': 'HR', 'sal': 65000 },
+  { 'Name': 'Jitu', 'Dept': 'HR', 'sal': 70000 }
+]);
+```
+- **Creates a collection** called `Employee` in MongoDB.
+- **Inserts multiple employee documents** into the `Employee` collection with fields:
+  - `Name`: The name of the employee.
+  - `Dept`: The department the employee belongs to (e.g., Accounts, Finance, HR).
+  - `sal`: The salary of the employee.
+
+#### 2. **Finding Employees with Salary Greater Than 50000**:
+```js
+db.Employee.find({ "sal": { $gt: 50000 } }).pretty();
+```
+- **Finds** all employees whose salary (`sal`) is **greater than 50,000**.
+- `$gt` is the "greater than" operator used to filter documents where `sal > 50000`.
+- `.pretty()` is used to format the output in a readable way.
+
+#### 3. **Finding Employees with Salary Between 50000 and 80000**:
+```js
+db.Employee.find({ "sal": { $gt: 50000, $lt: 80000 } }).pretty();
+```
+- **Finds** all employees whose salary (`sal`) is **greater than 50,000** and **less than 80,000**.
+- `$gt` (greater than) and `$lt` (less than) are used to filter the salary range.
+- `.pretty()` is used for formatting the results.
+
+#### 4. **Finding Employees in HR Department with Salary Greater Than 60000**:
+```js
+db.Employee.find({ $and: [{ "sal": { $gt: 60000 } }, { "Dept": "HR" }] }).pretty();
+```
+- **Finds** all employees who belong to the **HR department** and have a **salary greater than 60,000**.
+- `$and` is used to combine both conditions:
+  - `sal > 60000`
+  - `Dept = "HR"`
+- `.pretty()` is used to make the output readable.
+
+#### 5. **Updating Salary and Adding an Increment for HR Department**:
+```js
+db.Employee.updateMany(
+    { 'Dept': 'HR' },
+    { $set: { sal: '50000', increment: '10%' } }
+);
+```
+- **Updates** all employees in the **HR department**:
+  - Sets their salary (`sal`) to **50,000**.
+  - Adds a new field `increment` with the value `'10%'` for each document in the HR department.
+- The `updateMany` method affects all matching documents in the `Employee` collection where the `Dept` is 'HR'.
+
+#### 6. **Displaying All Employee Documents**:
+```js
+db.Employee.find().pretty();
+```
+- **Displays all documents** in the `Employee` collection.
+- `.pretty()` is used to format the output for readability.
+
+#### 7. **Deleting One Employee Document with Salary Less Than 10000 in Finance Department**:
+```js
+db.Employee.deleteOne({ $and: [{ "sal": { $lt: 10000 } }, { "Dept": "Finance" }] });
+```
+- **Deletes one employee** from the `Employee` collection where:
+  - Salary (`sal`) is **less than 10,000**.
+  - Department (`Dept`) is **Finance**.
+- The `deleteOne` method deletes only the **first matching document** that satisfies both conditions.
+
+### Summary of Operations:
+- **Create the collection** `Employee` and insert multiple employee documents with relevant details such as name, department, and salary.
+- **Query employees** based on different conditions like salary greater than 50,000, salary between 50,000 and 80,000, and employees in the HR department with a salary greater than 60,000.
+- **Update employee records** in the HR department, setting the salary to 50,000 and adding an increment of 10%.
+- **Display all documents** in the `Employee` collection.
+- **Delete a specific employee** from the Finance department with a salary less than 10,000.
+
+These operations demonstrate basic CRUD (Create, Read, Update, Delete) functionality in MongoDB.
